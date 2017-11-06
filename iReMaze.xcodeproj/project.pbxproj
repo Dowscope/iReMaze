@@ -103,9 +103,7 @@
 		93B248861FAE9CFD00120666 /* iReMaze */ = {
 			isa = PBXGroup;
 			children = (
-				93B248871FAE9CFD00120666 /* AppDelegate.swift */,
-				93B248891FAE9CFD00120666 /* GameScene.sks */,
-				93B2488B1FAE9CFD00120666 /* Actions.sks */,
+				93B248BB1FAE9D2000120666 /* System */,
 				93B2488D1FAE9CFD00120666 /* GameScene.swift */,
 				93B2488F1FAE9CFD00120666 /* GameViewController.swift */,
 				93B248911FAE9CFD00120666 /* Main.storyboard */,
@@ -132,6 +130,16 @@
 				93B248AF1FAE9CFE00120666 /* Info.plist */,
 			);
 			path = iReMazeUITests;
+			sourceTree = "<group>";
+		};
+		93B248BB1FAE9D2000120666 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				93B2488B1FAE9CFD00120666 /* Actions.sks */,
+				93B248891FAE9CFD00120666 /* GameScene.sks */,
+				93B248871FAE9CFD00120666 /* AppDelegate.swift */,
+			);
+			path = System;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -441,6 +449,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N62BF2D87Q;
 				INFOPLIST_FILE = iReMaze/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ca.dowscopemedia.iReMaze;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -456,6 +465,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N62BF2D87Q;
 				INFOPLIST_FILE = iReMaze/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ca.dowscopemedia.iReMaze;
 				PRODUCT_NAME = "$(TARGET_NAME)";

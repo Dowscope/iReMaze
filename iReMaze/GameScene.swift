@@ -162,7 +162,7 @@ class GameScene: SKScene {
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 5
+    let amountOfTiles: CGFloat = 20
     
     // RWe need a start index
     var startingTile: Int = 0

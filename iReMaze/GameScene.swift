@@ -123,13 +123,46 @@ class Tile {
     }
 }
 
+// Maze well need a GUI
+class UIManager : SKNode {
+    // Get the scene
+    let gameScene : SKScene
+    // Initialize the labels
+    let titleLBL = SKLabelNode(text: "MAZE")
+    let exitBTN = SKSpriteNode(imageNamed: "Exit")
+    
+    init(scene: SKScene){
+        gameScene = scene
+        super.init()
+        
+        // add labels to the scene
+        titleLBL.position = CGPoint(x: gameScene.frame.midX, y: gameScene.frame.midY + 220)
+        titleLBL.fontSize = 100
+        titleLBL.fontName = "Helvetica-bold"
+        self.addChild(titleLBL)
+        
+        exitBTN.position = CGPoint(x: 100, y: 50)
+        self.addChild(exitBTN)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+}
+
 class GameScene: SKScene {
+    // Initialize the UI
+    var uiManager: UIManager!
+    
+    // Create a camera node to hold the maze and the ui
+    let mainCamera = SKCameraNode()
     
     // Create an array to hold all the TILES of the maze
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 20
+    let amountOfTiles: CGFloat = 5
     
     // RWe need a start index
     var startingTile: Int = 0
@@ -146,7 +179,11 @@ class GameScene: SKScene {
     // Set a flag for map ceation completed
     var isMapCreated = false
     
+    // Set the first tile to the starting tile.
+    var previousTile: Tile!
+    
     override func didMove(to view: SKView) {
+        
         // Set the tile size need to achieve the amount of tiles.
         tileSize = frame.width / amountOfTiles
         
@@ -154,17 +191,20 @@ class GameScene: SKScene {
         startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
         
         // Correct where the 0,0 coord is located.
-        anchorPoint = CGPoint(x: 0, y: 0.25)
+        anchorPoint = CGPoint(x: 0, y: 0)
+        
+        mainCamera.position = CGPoint(x: 0, y: 300)
+        addChild(mainCamera)
         
         // Load the tile container full of tiles.
         for y in 0..<Int(amountOfTiles) {
             for x in 0..<Int(amountOfTiles) {
                 let tile = Tile(CGPoint(x: CGFloat(x), y: CGFloat(y)), tileSize)
-                addChild(tile.floorGFX)
-                addChild(tile.topWallGFX)
-                addChild(tile.bottomWallGFX)
-                addChild(tile.leftWallGFX)
-                addChild(tile.rightWallGFX)
+                mainCamera.addChild(tile.floorGFX)
+                mainCamera.addChild(tile.topWallGFX)
+                mainCamera.addChild(tile.bottomWallGFX)
+                mainCamera.addChild(tile.leftWallGFX)
+                mainCamera.addChild(tile.rightWallGFX)
                 
                 tileContainer.insert(tile, at: (x + y * Int(amountOfTiles)))
             }
@@ -174,8 +214,16 @@ class GameScene: SKScene {
         currentTile?.current()
         currentTile?.floorGFX.fillColor = Tile.START_COLOUR
         currentTile?.isStartingTile = true
+        
+        // Set the previous tile to the starting tile
+        previousTile = tileContainer[startingTile]
+        
+        // Add the UIManager to the scene
+        uiManager = UIManager(scene: self)
+        uiManager.position = CGPoint(x: 0, y: 175)
+        addChild(uiManager)
     }
-    
+
     override func update(_ currentTime: TimeInterval) {
         if isMapCreated == false {
             if let nextTile = findNextNeighbour() {
@@ -188,19 +236,27 @@ class GameScene: SKScene {
                 
                 if x > 0 {
                     currentTile?.leftWallGFX.isHidden = true
+                    currentTile?.hasLeftWall = false
                     nextTile.rightWallGFX.isHidden = true
+                    nextTile.hasRightWall = false
                 }
                 else if x < 0 {
                     currentTile?.rightWallGFX.isHidden = true
+                    currentTile?.hasRightWall = false
                     nextTile.leftWallGFX.isHidden = true
+                    nextTile.hasLeftWall = true
                 }
                 else if y < 0 {
                     currentTile?.topWallGFX.isHidden = true
+                    currentTile?.hasTopWall = false
                     nextTile.bottomWallGFX.isHidden = true
+                    nextTile.hasBottomWall = false
                 }
                 else {
                     currentTile?.bottomWallGFX.isHidden = true
+                    currentTile?.hasBottomWall = false
                     nextTile.topWallGFX.isHidden = true
+                    nextTile.hasTopWall = false
                 }
                 
                 currentTile = nextTile
@@ -217,6 +273,91 @@ class GameScene: SKScene {
         }
         else {
             setExitTile()
+        }
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        
+        for touch in touches {
+            let uiLocation = touch.location(in: uiManager)
+            
+            if isMapCreated {
+                let mazeLocation = touch.location(in: mainCamera)
+                
+                for tile in tileContainer {
+                    if tile.floorGFX.contains(mazeLocation) {
+                        
+                        if isNextTile(previousTile, tile) {
+                            tile.floorGFX.fillColor = SKColor.green
+                            previousTile = tile
+                        }
+                        
+                        break
+                    }
+                }
+            }
+            
+            if uiManager.exitBTN.contains(uiLocation) {
+                exit(0)
+            }
+        }
+    }
+    
+    func isNextTile(_ previousTile: Tile, _ nextTile: Tile) -> Bool{
+        if previousTile.positionOnBoard.x - 1 == nextTile.positionOnBoard.x &&
+            previousTile.positionOnBoard.y == nextTile.positionOnBoard.y{
+            if previousTile.hasLeftWall {
+                return false
+            }
+            return true
+        }
+        else if previousTile.positionOnBoard.x + 1 == nextTile.positionOnBoard.x &&
+            previousTile.positionOnBoard.y == nextTile.positionOnBoard.y{
+            if previousTile.hasRightWall {
+                return false
+            }
+            return true
+        }
+        else if previousTile.positionOnBoard.y - 1 == nextTile.positionOnBoard.y  &&
+            previousTile.positionOnBoard.x == nextTile.positionOnBoard.x{
+            if previousTile.hasBottomWall {
+                return false
+            }
+            return true
+        }
+        else if previousTile.positionOnBoard.y + 1 == nextTile.positionOnBoard.y  &&
+            previousTile.positionOnBoard.x == nextTile.positionOnBoard.x{
+            if previousTile.hasTopWall {
+                return false
+            }
+            return true
+        }
+        
+        return false
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let uiLocation = touch.location(in: uiManager)
+            
+            if isMapCreated {
+                let mazeLocation = touch.location(in: mainCamera)
+                
+                for tile in tileContainer {
+                    if tile.floorGFX.contains(mazeLocation) {
+                        if isNextTile(previousTile, tile) {
+                            tile.floorGFX.fillColor = SKColor.green
+                            previousTile = tile
+                        }
+                        break
+                    }
+                }
+            }
+            
+            if uiManager.exitBTN.contains(uiLocation) {
+                exit(0)
+            }
         }
     }
     

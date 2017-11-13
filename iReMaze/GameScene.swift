@@ -43,7 +43,8 @@ class Tile {
     static let VISITED_COLOUR = SKColor.purple
     static let WALL_COLOUR = SKColor.white
     static let CURRENT_COLOUR = SKColor.darkGray
-    static let START_COLOUR = SKColor.red
+    static let START_COLOUR = SKColor.green
+    static let END_COLOUR = SKColor.red
     
     // Tiles need visuals
     let floorGFX : SKShapeNode
@@ -106,21 +107,6 @@ class Tile {
         if isStartingTile { return }
         floorGFX.fillColor = Tile.CURRENT_COLOUR
     }
-    
-    func removeWall(wall: Int) {
-        switch wall {
-        case 0:
-            topWallGFX.isHidden = true
-        case 1:
-            rightWallGFX.isHidden = true
-        case 2:
-            bottomWallGFX.isHidden = true
-        case 3:
-            leftWallGFX.isHidden = true
-        default:
-            break
-        }
-    }
 }
 
 // Maze well need a GUI
@@ -129,7 +115,9 @@ class UIManager : SKNode {
     let gameScene : SKScene
     // Initialize the labels
     let titleLBL = SKLabelNode(text: "MAZE")
+    let instructionLBL = SKLabelNode(text: "Get from the GREEN square to the RED")
     let exitBTN = SKSpriteNode(imageNamed: "Exit")
+    let startOverBTN = SKSpriteNode(imageNamed: "StartOver")
     
     init(scene: SKScene){
         gameScene = scene
@@ -141,8 +129,15 @@ class UIManager : SKNode {
         titleLBL.fontName = "Helvetica-bold"
         self.addChild(titleLBL)
         
+        instructionLBL.position = CGPoint(x: gameScene.frame.midX, y: 90)
+        instructionLBL.fontName = "Helvetica"
+        self.addChild(instructionLBL)
+        
         exitBTN.position = CGPoint(x: 100, y: 50)
         self.addChild(exitBTN)
+        
+        startOverBTN.position = CGPoint (x: 300, y: 50)
+        self.addChild(startOverBTN)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -162,7 +157,7 @@ class GameScene: SKScene {
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 20
+    let amountOfTiles: CGFloat = 15
     
     // RWe need a start index
     var startingTile: Int = 0
@@ -223,9 +218,41 @@ class GameScene: SKScene {
         uiManager.position = CGPoint(x: 0, y: 175)
         addChild(uiManager)
     }
-
-    override func update(_ currentTime: TimeInterval) {
-        if isMapCreated == false {
+    
+    func restartBoard() {
+        for tile in tileContainer {
+            tile.hasBeenVisited = false
+            tile.hasBottomWall = true
+            tile.hasTopWall = true
+            tile.hasLeftWall = true
+            tile.hasRightWall = true
+            tile.bottomWallGFX.isHidden = false
+            tile.topWallGFX.isHidden = false
+            tile.leftWallGFX.isHidden = false
+            tile.rightWallGFX.isHidden = false
+            tile.floorGFX.fillColor = Tile.FLOOR_COLOUR
+            tile.isStartingTile = false
+            tile.isCurrent = false
+        }
+        
+        startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
+        
+        setExitTile()
+        
+        currentTile = tileContainer[startingTile]
+        currentTile?.current()
+        currentTile?.floorGFX.fillColor = Tile.START_COLOUR
+        currentTile?.isStartingTile = true
+        
+        // Set the previous tile to the starting tile
+        previousTile = tileContainer[startingTile]
+        
+        isMapCreated = false
+        createBoard()
+    }
+    
+    func createBoard() {
+        while isMapCreated == false {
             if let nextTile = findNextNeighbour() {
                 currentTile?.visit()
                 visitedTiles.append(currentTile!)
@@ -271,6 +298,12 @@ class GameScene: SKScene {
                 currentTile?.current()
             }
         }
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+        if isMapCreated == false {
+            createBoard()
+        }
         else {
             setExitTile()
         }
@@ -300,6 +333,10 @@ class GameScene: SKScene {
             
             if uiManager.exitBTN.contains(uiLocation) {
                 exit(0)
+            }
+            
+            if uiManager.startOverBTN.contains(uiLocation) {
+                restartBoard()
             }
         }
     }
@@ -363,7 +400,7 @@ class GameScene: SKScene {
     
     func setExitTile() {
         // Setting the exit tile.  0 = top left -> go clock-wise
-        let random = arc4random_uniform(4)
+        let random = Int(arc4random_uniform(4))
         var s : String
         
         switch random {
@@ -377,7 +414,7 @@ class GameScene: SKScene {
             s = "Tile_0_0"
         }
         
-        getTile(at: s)?.floorGFX.fillColor = Tile.START_COLOUR
+        getTile(at: s)?.floorGFX.fillColor = Tile.END_COLOUR
     }
     
     func findNextNeighbour() -> Tile? {

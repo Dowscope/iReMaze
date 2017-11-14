@@ -32,6 +32,9 @@ class Tile {
     // Flag for the starting tile
     var isStartingTile = false
     
+    // Flag for the end tile
+    var isEndTile = false
+    
     // Tiles will need to know what walls they have visible. Initally all will be set to true.
     var hasTopWall      = true
     var hasBottomWall   = true
@@ -57,7 +60,7 @@ class Tile {
     init(_ position: CGPoint, _ size: CGFloat){
         positionOnBoard = position
         tileSize = size
-        name = "Tile_\(position.x)_\(position.y)"
+        name = "Tile_\(Int(position.x))_\(Int(position.y))"
         
         // Create the floor visual
         floorGFX = SKShapeNode(rect: CGRect(x: positionOnBoard.x * size, y: positionOnBoard.y * size, width: size, height: size))
@@ -95,6 +98,22 @@ class Tile {
         return path.cgPath
     }
     
+    func resetTile() {
+        hasBeenVisited = false
+        isStartingTile = false
+        isCurrent = false
+        isEndTile = false
+        hasBottomWall = true
+        hasTopWall = true
+        hasLeftWall = true
+        hasRightWall = true
+        bottomWallGFX.isHidden = false
+        topWallGFX.isHidden = false
+        leftWallGFX.isHidden = false
+        rightWallGFX.isHidden = false
+        floorGFX.fillColor = Tile.FLOOR_COLOUR
+    }
+    
     func visit() {
         hasBeenVisited = true
         isCurrent = false
@@ -113,9 +132,14 @@ class Tile {
 class UIManager : SKNode {
     // Get the scene
     let gameScene : SKScene
+    
+    // Set message strings
+    let instructionSTR = "Get from the GREEN square to the RED"
+    let gameOverSTR = "YOU WIN!!!"
+    
     // Initialize the labels
     let titleLBL = SKLabelNode(text: "MAZE")
-    let instructionLBL = SKLabelNode(text: "Get from the GREEN square to the RED")
+    let instructionLBL = SKLabelNode(text: "")
     let exitBTN = SKSpriteNode(imageNamed: "Exit")
     let startOverBTN = SKSpriteNode(imageNamed: "StartOver")
     
@@ -130,6 +154,7 @@ class UIManager : SKNode {
         self.addChild(titleLBL)
         
         instructionLBL.position = CGPoint(x: gameScene.frame.midX, y: 90)
+        instructionLBL.text = instructionSTR
         instructionLBL.fontName = "Helvetica"
         self.addChild(instructionLBL)
         
@@ -157,7 +182,7 @@ class GameScene: SKScene {
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 15
+    let amountOfTiles: CGFloat = 5
     
     // RWe need a start index
     var startingTile: Int = 0
@@ -174,16 +199,21 @@ class GameScene: SKScene {
     // Set a flag for map ceation completed
     var isMapCreated = false
     
+    // Set Flag for game over.
+    var isGameOver = false
+    
     // Set the first tile to the starting tile.
     var previousTile: Tile!
+    
+    // Initialize the clock
+    var timer: TimeInterval = 0
+    var runTimer = false
+    var lastTime: TimeInterval = 0
     
     override func didMove(to view: SKView) {
         
         // Set the tile size need to achieve the amount of tiles.
         tileSize = frame.width / amountOfTiles
-        
-        // Randomize the start index
-        startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
         
         // Correct where the 0,0 coord is located.
         anchorPoint = CGPoint(x: 0, y: 0)
@@ -205,39 +235,24 @@ class GameScene: SKScene {
             }
         }
         
-        currentTile = tileContainer[startingTile]
-        currentTile?.current()
-        currentTile?.floorGFX.fillColor = Tile.START_COLOUR
-        currentTile?.isStartingTile = true
-        
-        // Set the previous tile to the starting tile
-        previousTile = tileContainer[startingTile]
-        
         // Add the UIManager to the scene
         uiManager = UIManager(scene: self)
         uiManager.position = CGPoint(x: 0, y: 175)
         addChild(uiManager)
+        
+        // Create a game board
+        newBoard()
     }
     
-    func restartBoard() {
+    func newBoard() {
         for tile in tileContainer {
-            tile.hasBeenVisited = false
-            tile.hasBottomWall = true
-            tile.hasTopWall = true
-            tile.hasLeftWall = true
-            tile.hasRightWall = true
-            tile.bottomWallGFX.isHidden = false
-            tile.topWallGFX.isHidden = false
-            tile.leftWallGFX.isHidden = false
-            tile.rightWallGFX.isHidden = false
-            tile.floorGFX.fillColor = Tile.FLOOR_COLOUR
-            tile.isStartingTile = false
-            tile.isCurrent = false
+            tile.resetTile()
         }
         
-        startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
+        isGameOver = false
+        uiManager.instructionLBL.text = uiManager.instructionSTR
         
-        setExitTile()
+        startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
         
         currentTile = tileContainer[startingTile]
         currentTile?.current()
@@ -249,6 +264,7 @@ class GameScene: SKScene {
         
         isMapCreated = false
         createBoard()
+        runTimer = true
     }
     
     func createBoard() {
@@ -292,6 +308,7 @@ class GameScene: SKScene {
                 currentTile?.visit()
                 if visitedTiles.isEmpty {
                     isMapCreated = true
+                    setExitTile()
                     return
                 }
                 currentTile = visitedTiles.popLast()
@@ -303,44 +320,54 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         if isMapCreated == false {
             createBoard()
-        }
-        else {
-            setExitTile()
+            timer = 0
+            runTimer = true
+        }else {
+            if runTimer {
+                if lastTime == 0 {
+                    lastTime = currentTime
+                }else {
+                    let delta = currentTime - lastTime
+                    timer += delta
+                }
+            }
         }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-        
         for touch in touches {
             let uiLocation = touch.location(in: uiManager)
-            
-            if isMapCreated {
-                let mazeLocation = touch.location(in: mainCamera)
-                
-                for tile in tileContainer {
-                    if tile.floorGFX.contains(mazeLocation) {
-                        
-                        if isNextTile(previousTile, tile) {
-                            tile.floorGFX.fillColor = SKColor.green
-                            previousTile = tile
-                        }
-                        
-                        break
-                    }
-                }
-            }
             
             if uiManager.exitBTN.contains(uiLocation) {
                 exit(0)
             }
             
             if uiManager.startOverBTN.contains(uiLocation) {
-                restartBoard()
+                newBoard()
             }
         }
     }
     
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            if isMapCreated && !isGameOver{
+                let mazeLocation = touch.location(in: mainCamera)
+                
+                for tile in tileContainer {
+                    if tile.floorGFX.contains(mazeLocation) {
+                        if tile.isEndTile {
+                            gameOver()
+                        }
+                        if isNextTile(previousTile, tile) {
+                            tile.floorGFX.fillColor = SKColor.green
+                            previousTile = tile
+                        }
+                        break
+                    }
+                }
+            }
+        }
+    }
     func isNextTile(_ previousTile: Tile, _ nextTile: Tile) -> Bool{
         if previousTile.positionOnBoard.x - 1 == nextTile.positionOnBoard.x &&
             previousTile.positionOnBoard.y == nextTile.positionOnBoard.y{
@@ -370,33 +397,16 @@ class GameScene: SKScene {
             }
             return true
         }
-        
         return false
     }
     
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let uiLocation = touch.location(in: uiManager)
-            
-            if isMapCreated {
-                let mazeLocation = touch.location(in: mainCamera)
-                
-                for tile in tileContainer {
-                    if tile.floorGFX.contains(mazeLocation) {
-                        if isNextTile(previousTile, tile) {
-                            tile.floorGFX.fillColor = SKColor.green
-                            previousTile = tile
-                        }
-                        break
-                    }
-                }
-            }
-            
-            if uiManager.exitBTN.contains(uiLocation) {
-                exit(0)
-            }
-        }
+    func gameOver() {
+        isGameOver = true
+        runTimer = false
+        uiManager.instructionLBL.text = "\(uiManager.gameOverSTR) It took you \(timer)"
     }
+    
+    
     
     func setExitTile() {
         // Setting the exit tile.  0 = top left -> go clock-wise
@@ -405,16 +415,18 @@ class GameScene: SKScene {
         
         switch random {
         case 0:
-            s = "Tile_0_\(amountOfTiles - 1)"
+            s = "Tile_0_\(Int(amountOfTiles) - 1)"
         case 1:
-            s = "Tile_\(amountOfTiles - 1)_\(amountOfTiles - 1)"
+            s = "Tile_\(Int(amountOfTiles) - 1)_\(Int(amountOfTiles) - 1)"
         case 2:
-            s = "Tile_\(amountOfTiles - 1)_0"
+            s = "Tile_\(Int(amountOfTiles) - 1)_0"
         default:
             s = "Tile_0_0"
         }
         
-        getTile(at: s)?.floorGFX.fillColor = Tile.END_COLOUR
+        let tile = getTile(at: s)
+        tile?.floorGFX.fillColor = Tile.END_COLOUR
+        tile?.isEndTile = true
     }
     
     func findNextNeighbour() -> Tile? {
@@ -432,7 +444,7 @@ class GameScene: SKScene {
         
         // Get the surrounding tiles of the current tile
         if locationOfCurrentTile.x < amountOfTiles - 1 {
-            let s = "Tile_\(locationOfCurrentTile.x + 1)_\(locationOfCurrentTile.y)"
+            let s = "Tile_\(Int(locationOfCurrentTile.x) + 1)_\(Int(locationOfCurrentTile.y))"
             rightTile = getTile(at: s)
             if (rightTile?.hasBeenVisited)! && rightTile != nil {
                 rightTile = nil
@@ -443,7 +455,7 @@ class GameScene: SKScene {
         }
         
         if locationOfCurrentTile.x > 0 {
-            let s = "Tile_\(locationOfCurrentTile.x - 1)_\(locationOfCurrentTile.y)"
+            let s = "Tile_\(Int(locationOfCurrentTile.x) - 1)_\(Int(locationOfCurrentTile.y))"
             leftTile = getTile(at: s)
             if (leftTile?.hasBeenVisited)! && leftTile != nil {
                 leftTile = nil
@@ -454,7 +466,7 @@ class GameScene: SKScene {
         }
         
         if locationOfCurrentTile.y < amountOfTiles - 1 {
-            let s = "Tile_\(locationOfCurrentTile.x)_\(locationOfCurrentTile.y + 1)"
+            let s = "Tile_\(Int(locationOfCurrentTile.x))_\(Int(locationOfCurrentTile.y) + 1)"
             topTile = getTile(at: s)
             if (topTile?.hasBeenVisited)! && topTile != nil {
                 topTile = nil
@@ -465,7 +477,7 @@ class GameScene: SKScene {
         }
         
         if locationOfCurrentTile.y > 0 {
-            let s = "Tile_\(locationOfCurrentTile.x)_\(locationOfCurrentTile.y - 1)"
+            let s = "Tile_\(Int(locationOfCurrentTile.x))_\(Int(locationOfCurrentTile.y) - 1)"
             bottomTile = getTile(at: s)
             if (bottomTile?.hasBeenVisited)! && bottomTile != nil {
                 bottomTile = nil

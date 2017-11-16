@@ -12,165 +12,6 @@
 import SpriteKit
 import GameplayKit
 
-// Tile Class -- Used to hold information about each tile on the maze.
-class Tile {
-    // Tiles will have a position on the board.
-    let positionOnBoard: CGPoint
-    
-    // Title will need to know its size
-    let tileSize: CGFloat
-    
-    // Tiles will have a name
-    let name: String
-    
-    // Tiles will need to know if they have been visited before. Initially set to false
-    var hasBeenVisited = false
-    
-    // Flag for current tile
-    var isCurrent = false
-    
-    // Flag for the starting tile
-    var isStartingTile = false
-    
-    // Flag for the end tile
-    var isEndTile = false
-    
-    // Tiles will need to know what walls they have visible. Initally all will be set to true.
-    var hasTopWall      = true
-    var hasBottomWall   = true
-    var hasLeftWall     = true
-    var hasRightWall    = true
-    
-    // Tiles will have certain colors to remember.
-    static let FLOOR_COLOUR = SKColor.blue
-    static let VISITED_COLOUR = SKColor.purple
-    static let WALL_COLOUR = SKColor.white
-    static let CURRENT_COLOUR = SKColor.darkGray
-    static let START_COLOUR = SKColor.green
-    static let END_COLOUR = SKColor.red
-    
-    // Tiles need visuals
-    let floorGFX : SKShapeNode
-    var topWallGFX = SKShapeNode()
-    var bottomWallGFX = SKShapeNode()
-    var leftWallGFX = SKShapeNode()
-    var rightWallGFX = SKShapeNode()
-    
-    // Class needs an initializer -- Takes in a position and a size from calling class
-    init(_ position: CGPoint, _ size: CGFloat){
-        positionOnBoard = position
-        tileSize = size
-        name = "Tile_\(Int(position.x))_\(Int(position.y))"
-        
-        // Create the floor visual
-        floorGFX = SKShapeNode(rect: CGRect(x: positionOnBoard.x * size, y: positionOnBoard.y * size, width: size, height: size))
-        floorGFX.fillColor = Tile.FLOOR_COLOUR
-        floorGFX.lineWidth = 0
-        
-        // Create the top wall visual
-        topWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size + size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size + size)))
-        topWallGFX.fillColor = Tile.WALL_COLOUR
-        topWallGFX.lineWidth = 2
-        
-        // Create the bottom wall visual
-        bottomWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size)))
-        bottomWallGFX.fillColor = Tile.WALL_COLOUR
-        bottomWallGFX.lineWidth = 2
-        
-        // Create the left wall visual
-        leftWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size), endPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size + size)))
-        leftWallGFX.fillColor = Tile.WALL_COLOUR
-        leftWallGFX.lineWidth = 2
-        
-        // Create the right wall visual
-        rightWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size + size, y: positionOnBoard.y * size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size + size)))
-        rightWallGFX.fillColor = Tile.WALL_COLOUR
-        rightWallGFX.lineWidth = 2
-    }
-    
-    // Tool used to create a CGPath
-    func makePath(startPoint: CGPoint, endPoint: CGPoint) -> CGPath{
-        let path = UIBezierPath()
-        path.move(to: startPoint)
-        path.addLine(to: endPoint)
-        path.close()
-        
-        return path.cgPath
-    }
-    
-    func resetTile() {
-        hasBeenVisited = false
-        isStartingTile = false
-        isCurrent = false
-        isEndTile = false
-        hasBottomWall = true
-        hasTopWall = true
-        hasLeftWall = true
-        hasRightWall = true
-        bottomWallGFX.isHidden = false
-        topWallGFX.isHidden = false
-        leftWallGFX.isHidden = false
-        rightWallGFX.isHidden = false
-        floorGFX.fillColor = Tile.FLOOR_COLOUR
-    }
-    
-    func visit() {
-        hasBeenVisited = true
-        isCurrent = false
-        if isStartingTile { return }
-        floorGFX.fillColor = Tile.VISITED_COLOUR
-    }
-    
-    func current(){
-        isCurrent = true
-        if isStartingTile { return }
-        floorGFX.fillColor = Tile.CURRENT_COLOUR
-    }
-}
-
-// Maze well need a GUI
-class UIManager : SKNode {
-    // Get the scene
-    let gameScene : SKScene
-    
-    // Set message strings
-    let instructionSTR = "Get from the GREEN square to the RED"
-    let gameOverSTR = "YOU WIN!!!"
-    
-    // Initialize the labels
-    let titleLBL = SKLabelNode(text: "MAZE")
-    let instructionLBL = SKLabelNode(text: "")
-    let exitBTN = SKSpriteNode(imageNamed: "Exit")
-    let startOverBTN = SKSpriteNode(imageNamed: "StartOver")
-    
-    init(scene: SKScene){
-        gameScene = scene
-        super.init()
-        
-        // add labels to the scene
-        titleLBL.position = CGPoint(x: gameScene.frame.midX, y: gameScene.frame.midY + 220)
-        titleLBL.fontSize = 100
-        titleLBL.fontName = "Helvetica-bold"
-        self.addChild(titleLBL)
-        
-        instructionLBL.position = CGPoint(x: gameScene.frame.midX, y: 90)
-        instructionLBL.text = instructionSTR
-        instructionLBL.fontName = "Helvetica"
-        self.addChild(instructionLBL)
-        
-        exitBTN.position = CGPoint(x: 100, y: 50)
-        self.addChild(exitBTN)
-        
-        startOverBTN.position = CGPoint (x: 300, y: 50)
-        self.addChild(startOverBTN)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-}
-
 class GameScene: SKScene {
     // Initialize the UI
     var uiManager: UIManager!
@@ -182,7 +23,7 @@ class GameScene: SKScene {
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 5
+    let amountOfTiles: CGFloat = 10
     
     // RWe need a start index
     var startingTile: Int = 0
@@ -201,6 +42,9 @@ class GameScene: SKScene {
     
     // Set Flag for game over.
     var isGameOver = false
+    
+    // Toggle Flag on/off
+    var toggleSW = false
     
     // Set the first tile to the starting tile.
     var previousTile: Tile!
@@ -225,11 +69,16 @@ class GameScene: SKScene {
         for y in 0..<Int(amountOfTiles) {
             for x in 0..<Int(amountOfTiles) {
                 let tile = Tile(CGPoint(x: CGFloat(x), y: CGFloat(y)), tileSize)
-                mainCamera.addChild(tile.floorGFX)
+                //mainCamera.addChild(tile.floorGFX)
                 mainCamera.addChild(tile.topWallGFX)
                 mainCamera.addChild(tile.bottomWallGFX)
                 mainCamera.addChild(tile.leftWallGFX)
                 mainCamera.addChild(tile.rightWallGFX)
+                
+                mainCamera.addChild(tile.floorSprite)
+                
+                mainCamera.addChild(tile.startTile)
+                mainCamera.addChild(tile.endTile)
                 
                 tileContainer.insert(tile, at: (x + y * Int(amountOfTiles)))
             }
@@ -264,6 +113,9 @@ class GameScene: SKScene {
         
         isMapCreated = false
         createBoard()
+        
+        drawTiles()
+        
         runTimer = true
     }
     
@@ -287,7 +139,7 @@ class GameScene: SKScene {
                     currentTile?.rightWallGFX.isHidden = true
                     currentTile?.hasRightWall = false
                     nextTile.leftWallGFX.isHidden = true
-                    nextTile.hasLeftWall = true
+                    nextTile.hasLeftWall = false
                 }
                 else if y < 0 {
                     currentTile?.topWallGFX.isHidden = true
@@ -316,6 +168,18 @@ class GameScene: SKScene {
             }
         }
     }
+    
+    func drawTiles() {
+        for tile in tileContainer {
+            tile.drawFloorSprite()
+            if tile.isStartingTile {
+                tile.startTile.isHidden = false
+            }
+            if tile.isEndTile {
+                tile.endTile.isHidden = false
+            }
+        }
+    }
 
     override func update(_ currentTime: TimeInterval) {
         if isMapCreated == false {
@@ -332,6 +196,8 @@ class GameScene: SKScene {
                 }
             }
         }
+        
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -344,6 +210,21 @@ class GameScene: SKScene {
             
             if uiManager.startOverBTN.contains(uiLocation) {
                 newBoard()
+            }
+            
+            if uiManager.toggleBTN.contains(uiLocation) {
+                if toggleSW {
+                    for tile in tileContainer {
+                        tile.floorSprite.isHidden = false
+                    }
+                    toggleSW = false
+                }
+                else {
+                    for tile in tileContainer {
+                        tile.floorSprite.isHidden = true
+                    }
+                    toggleSW = true
+                }
             }
         }
     }
@@ -359,7 +240,7 @@ class GameScene: SKScene {
                             gameOver()
                         }
                         if isNextTile(previousTile, tile) {
-                            tile.floorGFX.fillColor = SKColor.green
+                            tile.startTile.isHidden = false
                             previousTile = tile
                         }
                         break
@@ -368,6 +249,7 @@ class GameScene: SKScene {
             }
         }
     }
+    
     func isNextTile(_ previousTile: Tile, _ nextTile: Tile) -> Bool{
         if previousTile.positionOnBoard.x - 1 == nextTile.positionOnBoard.x &&
             previousTile.positionOnBoard.y == nextTile.positionOnBoard.y{

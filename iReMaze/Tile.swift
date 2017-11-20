@@ -46,12 +46,6 @@ class Tile {
     static let END_COLOUR = SKColor.red
     
     // Tiles need visuals
-    let floorGFX : SKShapeNode
-    var topWallGFX = SKShapeNode()
-    var bottomWallGFX = SKShapeNode()
-    var leftWallGFX = SKShapeNode()
-    var rightWallGFX = SKShapeNode()
-    
     var floorSprite = SKSpriteNode(imageNamed: "Tile_1111")
     
     var startTile = SKSpriteNode(imageNamed: "StartDot")
@@ -63,43 +57,21 @@ class Tile {
         tileSize = size
         name = "Tile_\(Int(position.x))_\(Int(position.y))"
         
-        // Create the floor visual
-        floorGFX = SKShapeNode(rect: CGRect(x: positionOnBoard.x * size, y: positionOnBoard.y * size, width: size, height: size))
-        floorGFX.fillColor = Tile.FLOOR_COLOUR
-        floorGFX.lineWidth = 0
-        
-        // Create the top wall visual
-        topWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size + size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size + size)))
-        topWallGFX.fillColor = Tile.WALL_COLOUR
-        topWallGFX.lineWidth = 2
-        
-        // Create the bottom wall visual
-        bottomWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size)))
-        bottomWallGFX.fillColor = Tile.WALL_COLOUR
-        bottomWallGFX.lineWidth = 2
-        
-        // Create the left wall visual
-        leftWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size), endPoint: CGPoint(x: positionOnBoard.x * size, y: positionOnBoard.y * size + size)))
-        leftWallGFX.fillColor = Tile.WALL_COLOUR
-        leftWallGFX.lineWidth = 2
-        
-        // Create the right wall visual
-        rightWallGFX = SKShapeNode(path: makePath(startPoint: CGPoint(x: positionOnBoard.x * size + size, y: positionOnBoard.y * size), endPoint: CGPoint(x: (positionOnBoard.x * size) + size, y: positionOnBoard.y * size + size)))
-        rightWallGFX.fillColor = Tile.WALL_COLOUR
-        rightWallGFX.lineWidth = 2
-        
         // Create the floor sprite visual.
         floorSprite.position = CGPoint(x: positionOnBoard.x * tileSize, y: positionOnBoard.y * tileSize)
         floorSprite.size = CGSize(width: tileSize, height: tileSize)
+        floorSprite.zPosition = CGFloat(-2)
         floorSprite.anchorPoint = CGPoint.zero
         
         // Initialize the start and end dots
         startTile.position = CGPoint(x: positionOnBoard.x * tileSize + (tileSize/2), y: positionOnBoard.y * tileSize + (tileSize/2))
         startTile.size = CGSize(width: tileSize - 50, height: tileSize - 50)
+        startTile.zPosition = (0)
         startTile.isHidden = true
         
         endTile.position = CGPoint(x: positionOnBoard.x * tileSize + (tileSize/2), y: positionOnBoard.y * tileSize + (tileSize/2))
         endTile.size = CGSize(width: tileSize - 50, height: tileSize - 50)
+        endTile.zPosition = CGFloat(0)
         startTile.isHidden = true
     }
     
@@ -122,11 +94,6 @@ class Tile {
         hasTopWall = true
         hasLeftWall = true
         hasRightWall = true
-        bottomWallGFX.isHidden = false
-        topWallGFX.isHidden = false
-        leftWallGFX.isHidden = false
-        rightWallGFX.isHidden = false
-        floorGFX.fillColor = Tile.FLOOR_COLOUR
         
         startTile.isHidden = true
         endTile.isHidden = true
@@ -136,13 +103,11 @@ class Tile {
         hasBeenVisited = true
         isCurrent = false
         if isStartingTile { return }
-        floorGFX.fillColor = Tile.VISITED_COLOUR
     }
     
     func current(){
         isCurrent = true
         if isStartingTile { return }
-        floorGFX.fillColor = Tile.CURRENT_COLOUR
     }
     
     func drawFloorSprite() {

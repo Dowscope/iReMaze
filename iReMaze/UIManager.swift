@@ -22,7 +22,6 @@ class UIManager : SKNode {
     let instructionLBL = SKLabelNode(text: "")
     let exitBTN = SKSpriteNode(imageNamed: "Exit")
     let startOverBTN = SKSpriteNode(imageNamed: "StartOver")
-    let toggleBTN = SKShapeNode(rect: CGRect(x: 500, y: 50, width: 50, height: 50))
     
     init(scene: SKScene){
         gameScene = scene
@@ -44,9 +43,6 @@ class UIManager : SKNode {
         
         startOverBTN.position = CGPoint (x: 300, y: 50)
         self.addChild(startOverBTN)
-        
-        toggleBTN.fillColor = SKColor.red
-        self.addChild(toggleBTN)
     }
     
     required init?(coder aDecoder: NSCoder) {

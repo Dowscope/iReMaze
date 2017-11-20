@@ -2,11 +2,11 @@
   "images" : [
     {
       "idiom" : "universal",
+      "filename" : "EndDot.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "EndDot.png",
       "scale" : "2x"
     },
     {

@@ -23,7 +23,7 @@ class GameScene: SKScene {
     var tileContainer = [Tile]()
     
     // Set amount of tiles wanted
-    let amountOfTiles: CGFloat = 10
+    static var amountOfTiles: CGFloat = 30
     
     // RWe need a start index
     var startingTile: Int = 0
@@ -57,30 +57,25 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         
         // Set the tile size need to achieve the amount of tiles.
-        tileSize = frame.width / amountOfTiles
+        tileSize = frame.width / GameScene.amountOfTiles
         
         // Correct where the 0,0 coord is located.
         anchorPoint = CGPoint(x: 0, y: 0)
         
         mainCamera.position = CGPoint(x: 0, y: 300)
+        mainCamera.zPosition = CGFloat(-2)
         addChild(mainCamera)
         
         // Load the tile container full of tiles.
-        for y in 0..<Int(amountOfTiles) {
-            for x in 0..<Int(amountOfTiles) {
+        for y in 0..<Int(GameScene.amountOfTiles) {
+            for x in 0..<Int(GameScene.amountOfTiles) {
                 let tile = Tile(CGPoint(x: CGFloat(x), y: CGFloat(y)), tileSize)
-                //mainCamera.addChild(tile.floorGFX)
-                mainCamera.addChild(tile.topWallGFX)
-                mainCamera.addChild(tile.bottomWallGFX)
-                mainCamera.addChild(tile.leftWallGFX)
-                mainCamera.addChild(tile.rightWallGFX)
-                
                 mainCamera.addChild(tile.floorSprite)
                 
                 mainCamera.addChild(tile.startTile)
                 mainCamera.addChild(tile.endTile)
                 
-                tileContainer.insert(tile, at: (x + y * Int(amountOfTiles)))
+                tileContainer.insert(tile, at: (x + y * Int(GameScene.amountOfTiles)))
             }
         }
         
@@ -101,11 +96,10 @@ class GameScene: SKScene {
         isGameOver = false
         uiManager.instructionLBL.text = uiManager.instructionSTR
         
-        startingTile = Int(arc4random_uniform(UInt32(amountOfTiles*amountOfTiles)))
+        startingTile = Int(arc4random_uniform(UInt32(GameScene.amountOfTiles*GameScene.amountOfTiles)))
         
         currentTile = tileContainer[startingTile]
         currentTile?.current()
-        currentTile?.floorGFX.fillColor = Tile.START_COLOUR
         currentTile?.isStartingTile = true
         
         // Set the previous tile to the starting tile
@@ -116,6 +110,7 @@ class GameScene: SKScene {
         
         drawTiles()
         
+        timer = 0
         runTimer = true
     }
     
@@ -130,27 +125,19 @@ class GameScene: SKScene {
                 let y = (currentTile?.positionOnBoard.y)! - nextTile.positionOnBoard.y
                 
                 if x > 0 {
-                    currentTile?.leftWallGFX.isHidden = true
                     currentTile?.hasLeftWall = false
-                    nextTile.rightWallGFX.isHidden = true
                     nextTile.hasRightWall = false
                 }
                 else if x < 0 {
-                    currentTile?.rightWallGFX.isHidden = true
                     currentTile?.hasRightWall = false
-                    nextTile.leftWallGFX.isHidden = true
                     nextTile.hasLeftWall = false
                 }
                 else if y < 0 {
-                    currentTile?.topWallGFX.isHidden = true
                     currentTile?.hasTopWall = false
-                    nextTile.bottomWallGFX.isHidden = true
                     nextTile.hasBottomWall = false
                 }
                 else {
-                    currentTile?.bottomWallGFX.isHidden = true
                     currentTile?.hasBottomWall = false
-                    nextTile.topWallGFX.isHidden = true
                     nextTile.hasTopWall = false
                 }
                 
@@ -205,26 +192,14 @@ class GameScene: SKScene {
             let uiLocation = touch.location(in: uiManager)
             
             if uiManager.exitBTN.contains(uiLocation) {
-                exit(0)
+                let sceneToMoveTo = SKScene(fileNamed: "MenuScene")!
+                sceneToMoveTo.scaleMode = self.scaleMode
+                self.removeFromParent()
+                self.view!.presentScene(sceneToMoveTo)
             }
             
             if uiManager.startOverBTN.contains(uiLocation) {
                 newBoard()
-            }
-            
-            if uiManager.toggleBTN.contains(uiLocation) {
-                if toggleSW {
-                    for tile in tileContainer {
-                        tile.floorSprite.isHidden = false
-                    }
-                    toggleSW = false
-                }
-                else {
-                    for tile in tileContainer {
-                        tile.floorSprite.isHidden = true
-                    }
-                    toggleSW = true
-                }
             }
         }
     }
@@ -235,7 +210,7 @@ class GameScene: SKScene {
                 let mazeLocation = touch.location(in: mainCamera)
                 
                 for tile in tileContainer {
-                    if tile.floorGFX.contains(mazeLocation) {
+                    if tile.floorSprite.contains(mazeLocation) {
                         if tile.isEndTile {
                             gameOver()
                         }
@@ -285,7 +260,7 @@ class GameScene: SKScene {
     func gameOver() {
         isGameOver = true
         runTimer = false
-        uiManager.instructionLBL.text = "\(uiManager.gameOverSTR) It took you \(timer)"
+        uiManager.instructionLBL.text = "\(uiManager.gameOverSTR) It took you \(Int(timer/1000)) seconds"
     }
     
     
@@ -297,17 +272,16 @@ class GameScene: SKScene {
         
         switch random {
         case 0:
-            s = "Tile_0_\(Int(amountOfTiles) - 1)"
+            s = "Tile_0_\(Int(GameScene.amountOfTiles) - 1)"
         case 1:
-            s = "Tile_\(Int(amountOfTiles) - 1)_\(Int(amountOfTiles) - 1)"
+            s = "Tile_\(Int(GameScene.amountOfTiles) - 1)_\(Int(GameScene.amountOfTiles) - 1)"
         case 2:
-            s = "Tile_\(Int(amountOfTiles) - 1)_0"
+            s = "Tile_\(Int(GameScene.amountOfTiles) - 1)_0"
         default:
             s = "Tile_0_0"
         }
         
         let tile = getTile(at: s)
-        tile?.floorGFX.fillColor = Tile.END_COLOUR
         tile?.isEndTile = true
     }
     
@@ -325,7 +299,7 @@ class GameScene: SKScene {
         var tempArray = [Tile?]()
         
         // Get the surrounding tiles of the current tile
-        if locationOfCurrentTile.x < amountOfTiles - 1 {
+        if locationOfCurrentTile.x < GameScene.amountOfTiles - 1 {
             let s = "Tile_\(Int(locationOfCurrentTile.x) + 1)_\(Int(locationOfCurrentTile.y))"
             rightTile = getTile(at: s)
             if (rightTile?.hasBeenVisited)! && rightTile != nil {
@@ -347,7 +321,7 @@ class GameScene: SKScene {
             }
         }
         
-        if locationOfCurrentTile.y < amountOfTiles - 1 {
+        if locationOfCurrentTile.y < GameScene.amountOfTiles - 1 {
             let s = "Tile_\(Int(locationOfCurrentTile.x))_\(Int(locationOfCurrentTile.y) + 1)"
             topTile = getTile(at: s)
             if (topTile?.hasBeenVisited)! && topTile != nil {

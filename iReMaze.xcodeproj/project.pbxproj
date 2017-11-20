@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		931EAF9E1FC271DB00C0C985 /* MenuScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 931EAF9D1FC271DB00C0C985 /* MenuScene.sks */; };
+		931EAFA01FC273D300C0C985 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EAF9F1FC273D300C0C985 /* MenuScene.swift */; };
+		931EAFA21FC27BD200C0C985 /* CreditScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 931EAFA11FC27BD200C0C985 /* CreditScene.sks */; };
+		931EAFA41FC27C0E00C0C985 /* CreditScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EAFA31FC27C0E00C0C985 /* CreditScene.swift */; };
 		9372004A1FBD1A73001905D0 /* Tile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937200491FBD1A73001905D0 /* Tile.swift */; };
 		9372004C1FBD1AE7001905D0 /* UIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9372004B1FBD1AE7001905D0 /* UIManager.swift */; };
 		93B248881FAE9CFD00120666 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B248871FAE9CFD00120666 /* AppDelegate.swift */; };
@@ -39,6 +43,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		931EAF9D1FC271DB00C0C985 /* MenuScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MenuScene.sks; sourceTree = "<group>"; };
+		931EAF9F1FC273D300C0C985 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
+		931EAFA11FC27BD200C0C985 /* CreditScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = CreditScene.sks; sourceTree = "<group>"; };
+		931EAFA31FC27C0E00C0C985 /* CreditScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditScene.swift; sourceTree = "<group>"; };
 		937200491FBD1A73001905D0 /* Tile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tile.swift; sourceTree = "<group>"; };
 		9372004B1FBD1AE7001905D0 /* UIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIManager.swift; sourceTree = "<group>"; };
 		93B248841FAE9CFD00120666 /* iReMaze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iReMaze.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -116,6 +124,10 @@
 				93B248991FAE9CFD00120666 /* Info.plist */,
 				937200491FBD1A73001905D0 /* Tile.swift */,
 				9372004B1FBD1AE7001905D0 /* UIManager.swift */,
+				931EAF9D1FC271DB00C0C985 /* MenuScene.sks */,
+				931EAF9F1FC273D300C0C985 /* MenuScene.swift */,
+				931EAFA11FC27BD200C0C985 /* CreditScene.sks */,
+				931EAFA31FC27C0E00C0C985 /* CreditScene.swift */,
 			);
 			path = iReMaze;
 			sourceTree = "<group>";
@@ -256,8 +268,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				93B248931FAE9CFD00120666 /* Main.storyboard in Resources */,
+				931EAF9E1FC271DB00C0C985 /* MenuScene.sks in Resources */,
 				93B2488A1FAE9CFD00120666 /* GameScene.sks in Resources */,
 				93B248951FAE9CFD00120666 /* Assets.xcassets in Resources */,
+				931EAFA21FC27BD200C0C985 /* CreditScene.sks in Resources */,
 				93B248981FAE9CFD00120666 /* LaunchScreen.storyboard in Resources */,
 				93B2488C1FAE9CFD00120666 /* Actions.sks in Resources */,
 			);
@@ -287,8 +301,10 @@
 				9372004C1FBD1AE7001905D0 /* UIManager.swift in Sources */,
 				93B2488E1FAE9CFD00120666 /* GameScene.swift in Sources */,
 				93B248901FAE9CFD00120666 /* GameViewController.swift in Sources */,
+				931EAFA01FC273D300C0C985 /* MenuScene.swift in Sources */,
 				93B248881FAE9CFD00120666 /* AppDelegate.swift in Sources */,
 				9372004A1FBD1A73001905D0 /* Tile.swift in Sources */,
+				931EAFA41FC27C0E00C0C985 /* CreditScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

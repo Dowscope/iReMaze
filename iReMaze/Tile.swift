@@ -10,6 +10,7 @@ import SpriteKit
 
 // Tile Class -- Used to hold information about each tile on the maze.
 class Tile {
+    
     // Tiles will have a position on the board.
     let positionOnBoard: CGPoint
     
@@ -48,8 +49,10 @@ class Tile {
     // Tiles need visuals
     var floorSprite = SKSpriteNode(imageNamed: "Tile_1111")
     
-    var startTile = SKSpriteNode(imageNamed: "StartDot")
-    var endTile = SKSpriteNode(imageNamed: "EndDot")
+    var startTile = SKSpriteNode(imageNamed: "Tree")
+    var endTile = SKSpriteNode(imageNamed: "CandyCane")
+    
+    var currentTile = SKSpriteNode(imageNamed: "Santa")
     
     // Class needs an initializer -- Takes in a position and a size from calling class
     init(_ position: CGPoint, _ size: CGFloat){
@@ -65,14 +68,20 @@ class Tile {
         
         // Initialize the start and end dots
         startTile.position = CGPoint(x: positionOnBoard.x * tileSize + (tileSize/2), y: positionOnBoard.y * tileSize + (tileSize/2))
-        startTile.size = CGSize(width: tileSize - 50, height: tileSize - 50)
-        startTile.zPosition = (0)
+        startTile.size = CGSize(width: tileSize, height: tileSize)
+        startTile.zPosition = CGFloat(0)
         startTile.isHidden = true
         
         endTile.position = CGPoint(x: positionOnBoard.x * tileSize + (tileSize/2), y: positionOnBoard.y * tileSize + (tileSize/2))
-        endTile.size = CGSize(width: tileSize - 50, height: tileSize - 50)
+        endTile.size = CGSize(width: tileSize, height: tileSize)
         endTile.zPosition = CGFloat(0)
         startTile.isHidden = true
+        
+        // Initialize the santa tile
+        currentTile.position = CGPoint(x: positionOnBoard.x * tileSize + (tileSize/2), y: positionOnBoard.y * tileSize + (tileSize/2))
+        currentTile.size = CGSize(width: tileSize, height: tileSize)
+        currentTile.isHidden = true;
+        currentTile.zPosition = CGFloat(1)
     }
     
     // Tool used to create a CGPath

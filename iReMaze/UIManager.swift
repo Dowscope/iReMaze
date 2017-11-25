@@ -14,7 +14,7 @@ class UIManager : SKNode {
     let gameScene : SKScene
     
     // Set message strings
-    let instructionSTR = "Get from the GREEN dot to the RED dot"
+    let instructionSTR = "Get from the Christmas Tree to the Candy Cane"
     let gameOverSTR = "YOU WIN!!!"
     
     // Initialize the labels

@@ -74,6 +74,7 @@ class GameScene: SKScene {
                 
                 mainCamera.addChild(tile.startTile)
                 mainCamera.addChild(tile.endTile)
+                mainCamera.addChild(tile.currentTile)
                 
                 tileContainer.insert(tile, at: (x + y * Int(GameScene.amountOfTiles)))
             }
@@ -215,7 +216,9 @@ class GameScene: SKScene {
                             gameOver()
                         }
                         if isNextTile(previousTile, tile) {
-                            tile.startTile.isHidden = false
+                            //tile.startTile.isHidden = false
+                            tile.currentTile.isHidden = false;
+                            previousTile.currentTile.isHidden = true;
                             previousTile = tile
                         }
                         break
